@@ -20,24 +20,27 @@ auto parseKeyLock(KeyLockLines)(KeyLockLines keyLockLines)
 
 auto parseKeyLocks(InputLines)(InputLines inputLines)
 {
-    import std.algorithm: chunkBy, map, sort;
+    import std.algorithm: map, partition;
     import std.array: array;
-    import std.range: dropOne;
     import std.typecons: tuple;
 
-    auto keyLocks = inputLines.map!parseKeyLock.array.sort.chunkBy!(a => a[0]);
+    auto keyLocksArr = inputLines.map!parseKeyLock
+                                 .array
+                                 ;
+    auto locks = keyLocksArr.partition!(a => a[0] == KeyLock.KEY);
+    auto keys = keyLocksArr[0..$ - locks.length];
 
-    return tuple(keyLocks.front, keyLocks.dropOne.front);
+    return tuple(keys, locks);
 }
 
 enum GROOOVE_HEIGHT = 7;
 
 auto solve(KeyLocks)(KeyLocks keyLocks) {
-    import std.algorithm: all, cartesianProduct, filter;
+    import std.algorithm: all, count, cartesianProduct, filter;
     import std.range: walkLength, zip;
 
-    auto matchingPairs = keyLocks[0][1]
-                    .cartesianProduct(keyLocks[1][1])
+    auto matchingPairs = keyLocks[0]
+                    .cartesianProduct(keyLocks[1])
                     .filter!(a => a[0][1].zip(a[1][1])
                                          .all!(b => b[0] + b[1] <= GROOOVE_HEIGHT))
                     .walkLength
